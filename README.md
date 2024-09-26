@@ -8,6 +8,7 @@ This is a simple contact management application that allows authenticated users 
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Project Folder Structure](#project-folder-structure)
+- [API Reference](#api-reference)
 - [Technologies Used](#technologies-used)
 
 ## Entity Relationship Diagram

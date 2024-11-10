@@ -7,18 +7,11 @@ const getAllContacts = async (
   return await ContactModel.find({ user_id: id });
 };
 
-const getContactById = async (
-  id: string,
-  loggedId: string
-): Promise<ContactDocument> => {
+const getContactById = async (id: string): Promise<ContactDocument> => {
   const contact = await ContactModel.findById(id);
 
   if (!contact) {
     throw new NotFound(`Contact with that id not found`);
-  }
-
-  if (contact.user_id.toString() !== loggedId) {
-    throw new Forbidden('You are not authorized to view this contact');
   }
 
   return contact;
@@ -32,8 +25,7 @@ const createContact = async (
 
 const updateContact = async (
   id: string,
-  contact: Partial<ContactDocument>,
-  loggedId: string
+  contact: Partial<ContactDocument>
 ): Promise<ContactDocument> => {
   const updatedContact = await ContactModel.findByIdAndUpdate(id, contact, {
     new: true,
@@ -43,22 +35,14 @@ const updateContact = async (
     throw new NotFound(`No matched contact found`);
   }
 
-  if (loggedId !== updatedContact.user_id.toString()) {
-    throw new Forbidden('You are not authorized to update this contact');
-  }
-
   return updatedContact;
 };
 
-const deleteContact = async (id: string, loggedId: string) => {
+const deleteContact = async (id: string) => {
   const contact = await ContactModel.findByIdAndDelete(id);
 
   if (!contact) {
     throw new NotFound(`No matched contact found`);
-  }
-
-  if (contact.user_id.toString() !== loggedId) {
-    throw new Forbidden('You are not authorized to delete this contact');
   }
 
   return contact;

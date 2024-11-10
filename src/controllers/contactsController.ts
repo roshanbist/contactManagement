@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import ContactModel, { ContactDocument } from '../model/ContactModel';
 import contactsService from '../services/contactsService';
 import { asyncErrorHandler } from '../utils/asyncErrorHandler';
-import { BadRequest, Forbidden } from '../utils/CustomError';
+import { BadRequest, Forbidden, NotFound } from '../utils/CustomError';
 import { UserDocument } from '../model/UserModel';
 
 export const loggedUserPayload = (req: Request) => {
@@ -63,9 +63,26 @@ export const getContactById = asyncErrorHandler(
     const loggedId = (loggedUserPayload(req)._id as string).toString();
 
     const id = req.params.id;
+
+    const contactList = await contactsService.getAllContacts(loggedId);
+
+    if (!contactList || contactList.length === 0) {
+      return next(
+        new NotFound('No contacts found. Please create a contact first.')
+      );
+    }
+
+    if (
+      !contactList.some((contact) => (contact?._id as string).toString() === id)
+    ) {
+      return next(
+        new NotFound(
+          'Matching Contact with this id not found in your contact list. Please try again.'
+        )
+      );
+    }
     const singleContact: ContactDocument = await contactsService.getContactById(
-      id,
-      loggedId
+      id
     );
 
     res.status(200).json(singleContact);
@@ -80,12 +97,27 @@ export const updateContact = asyncErrorHandler(
     const loggedId = (loggedUserPayload(req)._id as string).toString();
 
     const id = req.params.id;
+
+    const contactList = await contactsService.getAllContacts(loggedId);
+
+    if (!contactList || contactList.length === 0) {
+      return next(
+        new NotFound('No contacts found. Please create a contact first.')
+      );
+    }
+
+    if (
+      !contactList.some((contact) => (contact?._id as string).toString() === id)
+    ) {
+      return next(
+        new NotFound(
+          'Matching Contact with this id not found in your contact list. Please try again.'
+        )
+      );
+    }
+
     const contactData: Partial<ContactDocument> = req.body;
-    const updatedContact = await contactsService.updateContact(
-      id,
-      contactData,
-      loggedId
-    );
+    const updatedContact = await contactsService.updateContact(id, contactData);
 
     res.status(200).json(updatedContact);
   }
@@ -98,7 +130,29 @@ export const deleteContact = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const loggedId = (loggedUserPayload(req)._id as string).toString();
 
-    await contactsService.deleteContact(req.params.id, loggedId);
+    const contactList = await contactsService.getAllContacts(loggedId);
+
+    console.log('contact list', contactList);
+
+    if (!contactList || contactList.length === 0) {
+      return next(
+        new NotFound('No contacts found. Please create a contact first.')
+      );
+    }
+
+    if (
+      !contactList.some(
+        (contact) => (contact?._id as string).toString() === req.params.id
+      )
+    ) {
+      return next(
+        new NotFound(
+          'Matching Contact with this id not found in your contact list. Please try again.'
+        )
+      );
+    }
+
+    await contactsService.deleteContact(req.params.id);
     res.sendStatus(204);
   }
 );

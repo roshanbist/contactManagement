@@ -1,22 +1,22 @@
 export type ContactsType = {
   user_id: UserType;
-  name: String;
-  email: String;
-  phone: String;
+  name: string;
+  email: string;
+  phone: string;
 };
 
 export type UserType = {
-  username: String;
-  email: String;
-  password: String;
+  username: string;
+  email: string;
+  password: string;
 };
 
 export type JwtToken = {
-  accessToken: String;
+  accessToken: string;
 };
 
 export type JwtData = {
-  id: String;
-  username: String;
-  email: String;
+  id: string;
+  username: string;
+  email: string;
 };
